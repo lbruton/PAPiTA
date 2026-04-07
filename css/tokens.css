@@ -1,0 +1,49 @@
+/*
+ * PAPiTA — css/tokens.css
+ *
+ * Layer 1 of the three-layer CSS pattern:
+ *   1. tokens.css       — canonical token vocabulary + neutral fallbacks (this file)
+ *   2. theme-*.css      — values-only adapter that overrides tokens per theme
+ *   3. base.css + components/*.css — consume tokens via var(--*); never literals
+ *
+ * Fallback values here are neutral grayscale so the app remains legible if the
+ * theme adapter fails to load. Real values ship in css/theme-spacex.css.
+ *
+ * See DESIGN.md and specs/PAP-1-build-pan-auth-tracker-mvp/design.md
+ * § Canonical Token Vocabulary for the authoritative list.
+ */
+
+:root {
+  /* Surfaces & text */
+  --bg: #111;
+  --bg-elevated: #1a1a1a;
+  --text: #eee;
+  --text-muted: rgba(255, 255, 255, 0.55);
+
+  /* Borders & buttons */
+  --border: rgba(255, 255, 255, 0.15);
+  --btn-bg: rgba(255, 255, 255, 0.08);
+  --btn-border: rgba(255, 255, 255, 0.3);
+  --btn-bg-hover: rgba(255, 255, 255, 0.15);
+
+  /* State colors */
+  --claimed-bg: rgba(0, 180, 120, 0.08);
+  --danger: #ff5a5a;
+  --overlay: rgba(0, 0, 0, 0.5);
+
+  /* Typography */
+  --font-sans: system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Radii */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+}

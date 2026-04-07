@@ -1,0 +1,29 @@
+/*
+ * PAPiTA — css/theme-spacex.css
+ *
+ * Layer 2: values-only adapter. Overrides canonical tokens from tokens.css
+ * with the SpaceX palette. Must contain no selectors other than :root and
+ * no component rules.
+ *
+ * Values match specs/PAP-1-build-pan-auth-tracker-mvp/artifacts/playground.html
+ * (approved visual reference).
+ */
+
+/* vendor Rajdhani woff2 here in future — @font-face block goes here once a
+   vendored font file ships. Until then we rely on the system-ui fallback. */
+
+:root {
+  --bg: #000000;
+  --bg-elevated: #0a0a0f;
+  --text: #f0f0fa;
+  --text-muted: rgba(240, 240, 250, 0.55);
+  --border: rgba(240, 240, 250, 0.15);
+  --btn-bg: rgba(240, 240, 250, 0.1);
+  --btn-border: rgba(240, 240, 250, 0.35);
+  --btn-bg-hover: rgba(240, 240, 250, 0.18);
+  --claimed-bg: rgba(0, 180, 120, 0.08);
+  --danger: #ff5a5a;
+  --overlay: rgba(0, 0, 0, 0.5);
+  --font-sans: "Rajdhani", system-ui, sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", monospace;
+}
