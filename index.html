@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1366">
+<title>PAPiTA — Palo Alto Inventory Tracking Assistant</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components/toolbar.css">
+<link rel="stylesheet" href="css/components/table.css">
+<link rel="stylesheet" href="css/components/claim-form.css">
+<link rel="stylesheet" href="css/components/modal.css">
+<link rel="stylesheet" href="css/theme-spacex.css">
+</head>
+<body>
+<header id="toolbar" class="toolbar"><!-- wired in js/app.js --></header>
+<main id="main">
+  <section id="stats" class="stats" hidden></section>
+  <section id="empty-state" class="empty-state" hidden>
+    <p>No auth codes yet. Drop a vendor PDF or import a CSV to begin.</p>
+  </section>
+  <section id="table-wrap" hidden>
+    <table id="records-table"><thead></thead><tbody></tbody></table>
+  </section>
+  <div id="banner-root" class="banner-root" aria-live="polite"></div>
+  <div id="modal-root" class="modal-root"></div>
+</main>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

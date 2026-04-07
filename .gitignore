@@ -1,4 +1,23 @@
-node_modules/
+# OS
 .DS_Store
-*.pdf
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Env
 .env
+
+# Node (we don't use it but guard anyway)
+node_modules/
+
+# Sensitive work data — NEVER commit
+*.pdf
+*.csv
+CoWork/
+
+# Allow documented example fixtures if we ever add them
+!examples/**/*.pdf
+!examples/**/*.csv
