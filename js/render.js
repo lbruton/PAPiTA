@@ -91,7 +91,7 @@ function renderHead(rootEl) {
 function renderBody(rootEl, rows) {
   const parts = [];
   for (const r of rows) {
-    const claimed = !!r.claimed_at;
+    const claimed = Boolean(r.serial);
     const cls = claimed ? "row claimed" : "row unclaimed";
     const authCode = escapeHtml(r.auth_code || "");
     const isClaiming = claimingSet.has(r.auth_code);
@@ -147,7 +147,7 @@ function renderBody(rootEl, rows) {
 }
 
 function fireRerender(records, visibleCount) {
-  const claimed = records.filter((r) => !!r.claimed_at).length;
+  const claimed = records.filter((r) => Boolean(r.serial)).length;
   const unclaimed = records.length - claimed;
   const payload = {
     visible: visibleCount,
@@ -239,11 +239,6 @@ export function attachDelegation(rootEl, handlers) {
   delegate(rootEl, '[data-action="unclaim"]', "click", (_ev, node) => {
     const code = node.dataset.authCode;
     if (code && h.onUnclaim) h.onUnclaim(code);
-  });
-
-  delegate(rootEl, '[data-action="claim"]', "click", (_ev, node) => {
-    const code = node.dataset.authCode;
-    if (code && h.onClaim) h.onClaim(code);
   });
 
   delegate(rootEl, '[data-action="submit-claim"]', "submit", (ev, node) => {

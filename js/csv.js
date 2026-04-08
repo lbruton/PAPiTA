@@ -105,7 +105,9 @@ function tokenize(text) {
 }
 
 function unguardCell(v) {
-  if (v.length > 0 && v[0] === "'") return v.slice(1);
+  if (v.length >= 2 && v[0] === "'" && INJECTION_CHARS.has(v[1])) {
+    return v.slice(1);
+  }
   return v;
 }
 

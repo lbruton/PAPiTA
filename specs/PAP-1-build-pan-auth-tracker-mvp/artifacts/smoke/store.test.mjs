@@ -37,12 +37,21 @@ test("store: upsertMany dedup — newer claimed_at wins", () => {
   assert.equal(rec.notes, "new");
 });
 
-test("store: unclaimed never overwrites claimed", () => {
+test("store: unclaimed upsert preserves claim block but refreshes metadata", () => {
   reset();
-  store.upsertMany([baseRec("ABCD1234", { claimed_at: "2025-02-01T00:00:00Z", notes: "claimed" })]);
-  store.upsertMany([baseRec("ABCD1234", { claimed_at: "", notes: "unclaimed" })]);
+  store.upsertMany([baseRec("ABCD1234", {
+    serial: "SN-OLD", claimed_at: "2025-02-01T00:00:00Z", claimed_by: "alice", notes: "old",
+  })]);
+  store.upsertMany([baseRec("ABCD1234", {
+    serial: "", claimed_at: "", claimed_by: "", notes: "refreshed",
+  })]);
   const rec = store.getByAuthCode("ABCD1234");
-  assert.equal(rec.notes, "claimed");
+  // Claim block protected
+  assert.equal(rec.serial, "SN-OLD");
+  assert.equal(rec.claimed_at, "2025-02-01T00:00:00Z");
+  assert.equal(rec.claimed_by, "alice");
+  // Metadata refreshed
+  assert.equal(rec.notes, "refreshed");
 });
 
 test("store: claim duplicate-serial conflict", () => {

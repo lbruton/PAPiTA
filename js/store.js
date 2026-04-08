@@ -93,6 +93,11 @@ export function loadFromStorage() {
 
   if (!parsed || parsed.schema_version !== SCHEMA_VERSION) {
     records = [];
+    const found = parsed && parsed.schema_version != null ? parsed.schema_version : "unknown";
+    emitWarning({
+      type: "corrupt-payload",
+      message: `Stored data has an incompatible schema version (found v${found}, expected v${SCHEMA_VERSION}). Click Recover to export raw or clear.`,
+    });
     return { ok: false, error: "Incompatible schema version" };
   }
 
@@ -152,12 +157,45 @@ export function upsertMany(newRecords, { mergeStrategy = "claimed_at_wins" } = {
     const existing = records[idx];
     const incomingClaimed = candidate.claimed_at || "";
     const existingClaimed = existing.claimed_at || "";
-    if (incomingClaimed && (!existingClaimed || incomingClaimed > existingClaimed)) {
-      records[idx] = candidate;
-      updated += 1;
-    } else {
-      skipped += 1;
+
+    // Compare claim timestamps using Date.parse with lex fallback.
+    let incomingWinsClaim = false;
+    if (incomingClaimed) {
+      if (!existingClaimed) {
+        incomingWinsClaim = true;
+      } else {
+        const a = Date.parse(incomingClaimed);
+        const b = Date.parse(existingClaimed);
+        if (Number.isNaN(a) || Number.isNaN(b)) {
+          incomingWinsClaim = incomingClaimed > existingClaimed;
+        } else {
+          incomingWinsClaim = a > b;
+        }
+      }
     }
+
+    // Always refresh metadata from incoming. Claim block is governed
+    // separately by the claimed_at_wins rule.
+    const merged = { ...existing };
+    const metadataKeys = [
+      "part_number",
+      "description",
+      "order_number",
+      "order_date",
+      "customer_po",
+      "end_user_po",
+      "notes",
+    ];
+    for (const k of metadataKeys) {
+      if (k in candidate) merged[k] = candidate[k];
+    }
+    if (incomingWinsClaim) {
+      merged.serial = candidate.serial || "";
+      merged.claimed_at = candidate.claimed_at || "";
+      merged.claimed_by = candidate.claimed_by || "";
+    }
+    records[idx] = merged;
+    updated += 1;
   }
 
   persist();

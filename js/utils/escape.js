@@ -14,9 +14,10 @@ export function escapeHtml(str) {
 }
 
 export function normalizeAuthCode(str) {
-  const normalized = String(str ?? "").trim().toUpperCase();
+  const original = String(str ?? "");
+  const normalized = original.replace(/\s+/g, "").toUpperCase();
   if (!/^[A-Z0-9]{8}$/.test(normalized)) {
-    throw new Error(`Invalid auth code: ${normalized}`);
+    throw new Error(`Invalid auth code: ${original}`);
   }
   return normalized;
 }

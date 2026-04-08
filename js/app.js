@@ -9,6 +9,7 @@ import { el } from "./utils/dom.js";
 
 const STORAGE_KEY = "pan-auth-tracker-v1";
 
+let downloadErrorHandler = null;
 function downloadBlob(content, filename, mime) {
   try {
     const blob = new Blob([content], { type: mime || "application/octet-stream" });
@@ -20,8 +21,13 @@ function downloadBlob(content, filename, mime) {
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 0);
-  } catch (_err) {
-    // swallow
+  } catch (e) {
+    if (downloadErrorHandler) {
+      downloadErrorHandler({
+        type: "download-error",
+        message: "Couldn't save file: " + (e && e.message ? e.message : String(e)),
+      });
+    }
   }
 }
 
@@ -44,6 +50,9 @@ function debounce(fn, ms) {
 function warningMessage(warning) {
   if (!warning) return "";
   if (typeof warning === "string") return warning;
+  if (typeof warning.message === "string" && warning.message.length > 0) {
+    return warning.message;
+  }
   const map = {
     "storage-unavailable":
       "Your changes aren't being saved — localStorage is disabled or unavailable.",
@@ -51,8 +60,10 @@ function warningMessage(warning) {
       "Your changes aren't being saved — localStorage is full. Export your data before closing this tab.",
     "corrupt-payload":
       "The locally-stored dataset is corrupt and could not be loaded.",
+    "download-error": "Couldn't save the file.",
   };
-  return map[warning.type] || String(warning.type || warning.message || "Unknown warning");
+  if (warning.type && map[warning.type]) return map[warning.type];
+  return String(warning.type || warning || "Unknown warning");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -159,6 +170,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // --------- Store subscriptions (registered BEFORE hydration so
+  // startup warnings like storage-unavailable / corrupt-payload are seen) ----------
+  store.subscribe(() => rerender());
+  store.subscribeWarnings((w) => showBanner(w));
+  render.onRerender((stats) => updateStats(stats));
+  downloadErrorHandler = (w) => showBanner(w);
+
   // --------- Store hydration ----------
   const loadResult = store.loadFromStorage();
   if (loadResult && loadResult.ok === false) {
@@ -182,10 +200,6 @@ document.addEventListener("DOMContentLoaded", () => {
       },
     });
   }
-
-  store.subscribe(() => rerender());
-  store.subscribeWarnings((w) => showBanner(w));
-  render.onRerender((stats) => updateStats(stats));
 
   // --------- Delegation + claim init ----------
   render.attachDelegation(tableEl, {

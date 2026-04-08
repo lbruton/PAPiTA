@@ -1,8 +1,10 @@
 /*
  * PAPiTA — css/base.css
  *
- * Minimal reset + body typography. Tokens only — zero literal values.
- * Component-specific rules live in css/components/.
+ * Global reset, body typography, focus ring, button/input resets.
+ * Color values are token-only (var(--*)). Structural literals
+ * (px sizes, line-height) are inline because we don't yet have a
+ * typography token scale. Component-specific rules live in css/components/.
  */
 
 *,

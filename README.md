@@ -42,4 +42,4 @@ The full specification lives in DocVault under `specflow/PAPiTA/specs/PAP-1-buil
 
 ## Status
 
-MVP in progress.
+MVP delivered (PR #1).

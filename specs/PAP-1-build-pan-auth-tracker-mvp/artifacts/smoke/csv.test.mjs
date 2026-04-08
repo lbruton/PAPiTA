@@ -79,6 +79,19 @@ test("csv: injection guard prefixes apostrophe and round-trip strips it", () => 
   assert.equal(out.records[0].description, "+CMD");
 });
 
+test("csv: round-trip preserves leading apostrophe in non-injection cells", () => {
+  const input = [{
+    auth_code: "ABCD1234", part_number: "PN", description: "d",
+    order_number: "", order_date: "", customer_po: "", end_user_po: "",
+    serial: "", claimed_by: "", claimed_at: "", imported_at: "",
+    notes: "'pending",
+  }];
+  const csv = encode(input);
+  const out = decode(csv);
+  assert.deepEqual(out.errors, []);
+  assert.equal(out.records[0].notes, "'pending");
+});
+
 test("csv: atomic rejection when auth_code column missing", () => {
   const csv = "part_number,description,order_number,order_date,customer_po,end_user_po,serial,claimed_by,claimed_at,imported_at,notes\nPN,desc,,,,,,,,,\n";
   const out = decode(csv);
