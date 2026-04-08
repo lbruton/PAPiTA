@@ -40,14 +40,14 @@ Module map:
 
 ## Token-Adapter CSS Invariant (CRITICAL)
 
-Component CSS references **only** canonical tokens via `var(--*)`. Themes are values-only adapters (`css/theme-<brand>.css`). Verify before any CSS commit:
+**Color values** (hex, rgb/rgba, hsl/hsla) in component CSS must reference canonical tokens via `var(--*)`. CSS keywords like `transparent`, `currentColor`, `inherit`, and `initial` are allowed since they're not brand values. Themes are values-only adapters (`css/theme-<brand>.css`). Verify before any CSS commit:
 
 ```bash
-grep -rnE '(#[0-9a-fA-F]{3,8}\b|rgb\(|rgba\()' css/components/
+grep -rnE '(#[0-9a-fA-F]{3,8}\b|rgb\(|rgba\(|hsl\(|hsla\()' css/components/
 # Must return ZERO matches.
 ```
 
-If you need a value that has no token, add a token to `css/tokens.css` AND `css/theme-spacex.css` AND `DESIGN.md`. Never inline brand values in component CSS.
+If you need a color that has no token, add a token to `css/tokens.css` AND `css/theme-spacex.css` AND `DESIGN.md`. Never inline brand color values in component CSS.
 
 ## Record Schema
 
@@ -55,8 +55,9 @@ Each record has: `auth_code`, `part_number`, `description`, `order_number`, `ord
 
 ## Workflow
 
-- Branch protection: PRs target `main` (dev exists but is small enough to push direct to main; PR back to dev only if it diverges)
-- All feature work in `.worktrees/<branch-name>` worktrees — never edit on main
+- **PRs are required for `main`** — branch protection enforced (confirmed in PR #2). No direct pushes; always feature branch + PR.
+- All feature work happens in `.worktrees/<branch-name>` git worktrees, never edited on main directly
+- A `dev` branch exists but is currently fast-forwarded to match `main` — only PR back to `dev` if it diverges
 - No `devops/version.lock` — PAPiTA is unversioned by design (single-user tool)
 - Issue prefix `PAP` — issues live in DocVault at `Projects/PAPiTA/Issues/`
 
@@ -67,6 +68,8 @@ Each record has: `auth_code`, `part_number`, `description`, `order_number`, `ord
 - Source PDFs and exported CSVs contain sensitive customer data — `.gitignore` excludes `*.pdf`, `*.csv`, `CoWork/`. Never commit them.
 - Render user-supplied strings ONLY via `escapeHtml` — never `innerHTML` with raw values
 - All `localStorage` access wrapped in try/catch; warnings flow through `store.subscribeWarnings`
+- `normalizeAuthCode` collapses ALL whitespace (including internal) via `replace(/\s+/g, "")` before validating against `^[A-Z0-9]{8}$` — PDF text-layer extraction sometimes splits cells with stray internal spaces
+- **Subscriber registration order:** `store.subscribe(...)` and `store.subscribeWarnings(...)` MUST be called BEFORE `store.loadFromStorage()`. Startup warnings (storage-unavailable, corrupt-payload) emit during `loadFromStorage` and are silently lost if subscribers aren't already wired.
 
 ## Open Follow-Ups
 

@@ -13,6 +13,9 @@ Thumbs.db
 # Node (we don't use it but guard anyway)
 node_modules/
 
+# Git worktrees (per project convention; never commit worktree contents)
+.worktrees/
+
 # Sensitive work data — NEVER commit
 *.pdf
 *.csv
