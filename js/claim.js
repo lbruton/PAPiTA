@@ -41,8 +41,8 @@ export function unclaim(authCode) {
   // store.subscribe triggers re-render via app.js
 }
 
-export function commitClaim(authCode, serial) {
-  const result = store.claim(authCode, serial);
+export function commitClaim(authCode, serial, claimedBy) {
+  const result = store.claim(authCode, serial, { claimedBy });
   if (result && result.ok) {
     render.endClaimUI(authCode);
     renderTrigger();
@@ -53,13 +53,14 @@ export function commitClaim(authCode, serial) {
       authCode,
       serial: result.conflict.serial || serial,
       otherCode: result.conflict.authCode,
+      claimedBy,
     });
     return;
   }
   // Non-conflict error — leave row in claim-in-progress for the user to retry.
 }
 
-function openDuplicateModal({ authCode, serial, otherCode }) {
+function openDuplicateModal({ authCode, serial, otherCode, claimedBy = "" }) {
   const cancelBtn = el(
     "button",
     {
@@ -85,7 +86,7 @@ function openDuplicateModal({ authCode, serial, otherCode }) {
   });
 
   overrideBtn.addEventListener("click", () => {
-    const result = store.claim(authCode, serial, { override: true });
+    const result = store.claim(authCode, serial, { override: true, claimedBy });
     if (result && result.ok) {
       render.endClaimUI(authCode);
       closeAllModals();

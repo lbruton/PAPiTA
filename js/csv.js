@@ -7,6 +7,7 @@ const COLUMNS = [
   "order_number",
   "order_date",
   "serial",
+  "claimed_by",
   "claimed_at",
   "imported_at",
   "notes",

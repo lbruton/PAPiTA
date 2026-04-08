@@ -15,7 +15,7 @@
   color: var(--text);
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
-  width: 160px;
+  width: 140px;
   font-family: var(--font-mono);
   letter-spacing: normal;
 }

@@ -97,6 +97,12 @@ export function loadFromStorage() {
   }
 
   records = Array.isArray(parsed.records) ? parsed.records : [];
+  // Backward-compat: default claimed_by to empty string on older payloads.
+  for (const rec of records) {
+    if (rec && typeof rec === "object" && rec.claimed_by === undefined) {
+      rec.claimed_by = "";
+    }
+  }
   return { ok: true, hydrated: true, count: records.length };
 }
 
@@ -153,7 +159,7 @@ export function upsertMany(newRecords, { mergeStrategy = "claimed_at_wins" } = {
   return { added, skipped, updated, errors };
 }
 
-export function claim(authCode, serial, { override = false } = {}) {
+export function claim(authCode, serial, { override = false, claimedBy = "" } = {}) {
   let normalized;
   try {
     normalized = normalizeAuthCode(authCode);
@@ -179,6 +185,7 @@ export function claim(authCode, serial, { override = false } = {}) {
   }
   target.serial = trimmed;
   target.claimed_at = nowIso();
+  target.claimed_by = typeof claimedBy === "string" ? claimedBy.trim() : "";
   persist();
   notify();
   return { ok: true };
@@ -197,6 +204,7 @@ export function unclaim(authCode) {
   }
   target.serial = "";
   target.claimed_at = "";
+  target.claimed_by = "";
   persist();
   notify();
   return { ok: true };

@@ -11,6 +11,7 @@ const COLUMNS = [
   { key: "description", label: "Description" },
   { key: "order_number", label: "Order #" },
   { key: "serial", label: "Serial", mono: true },
+  { key: "claimed_by", label: "Claimed By" },
   { key: "claimed_at", label: "Claimed At" },
 ];
 
@@ -99,10 +100,11 @@ function renderBody(rootEl, rows) {
 
     if (isClaiming) {
       parts.push(
-        '<td><form class="claim-form" data-action="submit-claim" data-auth-code="' +
+        '<td colspan="2"><form class="claim-form" data-action="submit-claim" data-auth-code="' +
           authCode +
           '">' +
           '<input name="serial" type="text" autofocus placeholder="Serial">' +
+          '<input name="claimed_by" type="text" placeholder="Your name">' +
           "<button type=\"submit\">Save</button>" +
           '<button type="button" data-action="cancel-claim" data-auth-code="' +
           authCode +
@@ -111,6 +113,7 @@ function renderBody(rootEl, rows) {
       );
     } else {
       parts.push('<td class="mono">' + escapeHtml(r.serial || "") + "</td>");
+      parts.push("<td>" + escapeHtml(r.claimed_by || "") + "</td>");
     }
 
     parts.push('<td class="muted">' + escapeHtml(fmtDate(r.claimed_at)) + "</td>");
@@ -241,7 +244,9 @@ export function attachDelegation(rootEl, handlers) {
     ev.preventDefault();
     const code = node.dataset.authCode;
     const input = node.querySelector('input[name="serial"]');
+    const byInput = node.querySelector('input[name="claimed_by"]');
     const serial = input ? input.value : "";
-    if (code && h.onSubmitClaim) h.onSubmitClaim(code, serial);
+    const claimedBy = byInput ? byInput.value : "";
+    if (code && h.onSubmitClaim) h.onSubmitClaim(code, serial, claimedBy);
   });
 }

@@ -56,6 +56,10 @@ function warningMessage(warning) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Prevent browser default drop navigation anywhere on the window.
+  window.addEventListener("dragover", (e) => e.preventDefault());
+  window.addEventListener("drop", (e) => e.preventDefault());
+
   const toolbarEl = document.getElementById("toolbar");
   const mainEl = document.getElementById("main");
   const statsEl = document.getElementById("stats");
@@ -188,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
     onSort: (col) => render.setSort(col),
     onStartClaim: (code) => claim.startClaim(code),
     onCancelClaim: (code) => claim.cancelClaim(code),
-    onSubmitClaim: (code, serial) => claim.commitClaim(code, serial),
+    onSubmitClaim: (code, serial, claimedBy) => claim.commitClaim(code, serial, claimedBy),
     onUnclaim: (code) => claim.unclaim(code),
   });
   claim.init({ renderTrigger: rerender });
@@ -236,6 +240,16 @@ document.addEventListener("DOMContentLoaded", () => {
     ev.preventDefault();
     const file = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
     handlePdfFile(file);
+  });
+
+  // Whole-page drop zone — operator can drop anywhere.
+  document.body.addEventListener("dragover", (ev) => {
+    ev.preventDefault();
+  });
+  document.body.addEventListener("drop", (ev) => {
+    ev.preventDefault();
+    const file = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+    if (file && /\.pdf$/i.test(file.name)) handlePdfFile(file);
   });
 
   csvInput.addEventListener("change", async (ev) => {

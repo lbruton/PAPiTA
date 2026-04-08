@@ -18,6 +18,47 @@ const HEADER_PATTERNS = [
   "total",
   "order",
 ];
+const ANTI_LABELS = [
+  "customer po",
+  "po number",
+  "purchase order",
+  "order number",
+  "order date",
+  "auth code",
+  "authorization code",
+  "part number",
+  "description",
+  "quantity",
+  "unit price",
+  "ext price",
+  "line total",
+  "page ",
+  "total",
+  "subtotal",
+  "ship to",
+  "sold to",
+  "bill to",
+  "phone",
+  "email",
+  "fax",
+];
+
+function hasAntiLabel(cells) {
+  for (const cell of cells) {
+    const lc = String(cell || "").toLowerCase();
+    if (!lc) continue;
+    for (const label of ANTI_LABELS) {
+      if (lc.includes(label)) return true;
+    }
+  }
+  return false;
+}
+
+function isValidPartNumber(s) {
+  if (!s) return false;
+  if (!/^[A-Z0-9][A-Z0-9-]{2,}$/i.test(s)) return false;
+  return s.includes("-") || /^PAN-/i.test(s);
+}
 const ORDER_NUMBER_RE = /Order\s*Number\s*[:#]?\s*(\d+)/i;
 const ORDER_DATE_RE = /Order\s*Date\s*[:#]?\s*([0-9A-Za-z\/\-\s,]+?)(?:\s{2,}|$)/i;
 
@@ -113,6 +154,7 @@ export async function parseFile(file) {
       for (const cells of rows) {
         if (!cells.length) continue;
         if (isHeaderRow(cells)) continue;
+        if (hasAntiLabel(cells)) continue;
 
         // Find auth code cell.
         let authIdx = -1;
@@ -133,23 +175,34 @@ export async function parseFile(file) {
           continue;
         }
 
+        // Candidate pool excludes the auth_code cell itself.
+        const candidates = cells.filter((_c, i) => i !== authIdx);
+
         // Part number heuristic: prefer neighbor matching PAN-/alphanum-dash.
         const prev = authIdx > 0 ? cells[authIdx - 1] : "";
         const next = authIdx < cells.length - 1 ? cells[authIdx + 1] : "";
         let part_number = "";
         if (looksLikePartNumber(prev)) part_number = prev;
         else if (looksLikePartNumber(next)) part_number = next;
-        else part_number = prev || next || "";
+        else {
+          // Fall back: search candidate pool for first valid part number.
+          const match = candidates.find((c) => looksLikePartNumber(c));
+          part_number = match || "";
+        }
 
-        // Description: longest remaining cell.
+        if (!isValidPartNumber(part_number)) {
+          skipped += 1;
+          continue;
+        }
+
+        // Description: longest remaining cell (excluding auth_code and part_number).
         let description = "";
         let maxLen = 0;
-        for (let i = 0; i < cells.length; i++) {
-          if (i === authIdx) continue;
-          if (cells[i] === part_number) continue;
-          if (cells[i].length > maxLen) {
-            maxLen = cells[i].length;
-            description = cells[i];
+        for (const c of candidates) {
+          if (c === part_number) continue;
+          if (c.length > maxLen) {
+            maxLen = c.length;
+            description = c;
           }
         }
 
@@ -160,6 +213,7 @@ export async function parseFile(file) {
           order_number: orderMeta.order_number,
           order_date: orderMeta.order_date,
           serial: "",
+          claimed_by: "",
           claimed_at: "",
           imported_at: nowIso(),
           notes: "",
