@@ -1,1 +1,66 @@
-/* PAPiTA: placeholder — authored in Task 11 */
+/* PAPiTA — modal (duplicate-serial + recovery) */
+
+.modal-root {
+  display: contents;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  max-width: 480px;
+  width: 90%;
+  color: var(--text);
+}
+
+.modal-title {
+  margin: 0 0 var(--space-3) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 14px;
+  color: var(--danger);
+}
+
+.modal-body {
+  margin: 0 0 var(--space-5) 0;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+
+.modal-actions .btn {
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  color: var(--text);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.modal-actions .btn:hover {
+  background: var(--btn-bg-hover);
+}
+
+.modal-actions .btn-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
