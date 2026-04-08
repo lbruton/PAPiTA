@@ -1,0 +1,126 @@
+/* PAPiTA — toolbar, brand, stats, empty-state, banner */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 5;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-right: var(--space-5);
+  color: var(--text);
+}
+
+.toolbar .spacer {
+  flex: 1;
+}
+
+.btn {
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  color: var(--text);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 120ms;
+}
+
+.btn:hover {
+  background: var(--btn-bg-hover);
+}
+
+.btn-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.filter-input {
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+  color: var(--text);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  width: 240px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.filter-input::placeholder {
+  color: var(--text-muted);
+}
+
+.drop-zone {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Stats strip */
+.stats {
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.stats strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* Empty state */
+.empty-state {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  border: 1px dashed var(--border);
+  margin: var(--space-5);
+  border-radius: var(--radius-md);
+}
+
+/* Banner root + banner */
+.banner-root {
+  display: block;
+}
+
+.banner {
+  margin: var(--space-4) var(--space-5) 0 var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.banner-dismiss {
+  background: transparent;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}

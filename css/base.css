@@ -1,0 +1,53 @@
+/*
+ * PAPiTA — css/base.css
+ *
+ * Global reset, body typography, focus ring, button/input resets.
+ * Color values are token-only (var(--*)). Structural literals
+ * (px sizes, line-height) are inline because we don't yet have a
+ * typography token scale. Component-specific rules live in css/components/.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+:focus-visible {
+  outline: 2px solid var(--btn-border);
+  outline-offset: 2px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
