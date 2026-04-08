@@ -36,8 +36,11 @@ const SAMPLE_FILES = {
   northstar: "AuthCode_Sample_NorthStar_10719902.pdf",
 };
 
-if (!fs.existsSync(path.join(samplesDir, SAMPLE_FILES.acme))) {
-  test("e2e: SKIPPED (CoWork/samples/*.pdf not present — run CoWork/gen_samples.py)", () => {});
+const missingSamples = Object.values(SAMPLE_FILES).filter(
+  (f) => !fs.existsSync(path.join(samplesDir, f))
+);
+if (missingSamples.length > 0) {
+  test(`e2e: SKIPPED (missing CoWork/samples/: ${missingSamples.join(", ")} — run CoWork/gen_samples.py)`, () => {});
 } else {
   // Lazy import store/csv/parser — only loaded when samples are present.
   const store = await import("../../../../js/store.js");
@@ -88,7 +91,7 @@ if (!fs.existsSync(path.join(samplesDir, SAMPLE_FILES.acme))) {
     const unclaimedCode = acmeAuthCodes[7];
     for (let i = 0; i < 7; i++) {
       const res = store.claim(acmeAuthCodes[i], `SN-ACME-${1000 + i}`, { claimedBy: "test-runner" });
-      assert.ok(res && (res.ok === undefined || res.ok), `step 3: claim ${i} should succeed`);
+      assert.ok(res.ok, `step 3: claim ${i} should succeed`);
     }
     const claimedCount = store.getAll().filter((r) => r.serial).length;
     assert.equal(claimedCount, 7, "step 3: exactly 7 records should be claimed");
@@ -136,7 +139,7 @@ if (!fs.existsSync(path.join(samplesDir, SAMPLE_FILES.acme))) {
     const csv2 = csv.encode(store.getAll());
     const decoded2 = csv.decode(csv2);
     assert.equal(decoded2.records.length, 14, "step 7: CSV contains all 14 records");
-    assert.equal(decoded2.errors.length, 0);
+    assert.equal(decoded2.errors.length, 0, "step 7: CSV roundtrip should produce no errors");
     // ACME serials should still be in the exported CSV
     const acmeWithSerials = decoded2.records.filter(
       (r) => r.order_number === "10717301" && r.serial
@@ -155,9 +158,10 @@ if (!fs.existsSync(path.join(samplesDir, SAMPLE_FILES.acme))) {
       .getAll()
       .filter((r) => r.order_number === "10719902")
       .map((r) => r.auth_code);
-    assert.equal(nsAuthCodes.length, 12);
+    assert.equal(nsAuthCodes.length, 12, "step 9: should find 12 NorthStar auth codes to claim");
     for (let i = 0; i < nsAuthCodes.length; i++) {
-      store.claim(nsAuthCodes[i], `SN-NS-${2000 + i}`, { claimedBy: "test-runner" });
+      const res = store.claim(nsAuthCodes[i], `SN-NS-${2000 + i}`, { claimedBy: "test-runner" });
+      assert.ok(res.ok, `step 9: NorthStar claim ${i} should succeed`);
     }
     const nsClaimed = store
       .getAll()
