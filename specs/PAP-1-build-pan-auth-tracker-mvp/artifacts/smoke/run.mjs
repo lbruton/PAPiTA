@@ -4,6 +4,7 @@ globalThis.__papitaTests = [];
 await import("./csv.test.mjs");
 await import("./store.test.mjs");
 await import("./parser-row-regex.test.mjs");
+await import("./e2e.test.mjs");
 
 let pass = 0, fail = 0;
 for (const t of globalThis.__papitaTests) {
