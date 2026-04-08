@@ -1,0 +1,37 @@
+/*
+ * PAPiTA — css/theme-halo.css
+ *
+ * Layer 2: values-only adapter. Overrides canonical tokens from tokens.css
+ * with a Halo "Cortana HUD" palette — deep navy surfaces, cyan/teal accents,
+ * spectral white text. Evokes a UNSC tactical readout. Must contain no
+ * selectors other than :root and no component rules.
+ *
+ * Palette inspiration: Cortana holographic interfaces from Halo 2-4.
+ */
+
+:root {
+  /* Surfaces — deep navy, subtly lighter elevated layer */
+  --bg: #030912;
+  --bg-elevated: #0a1828;
+
+  /* Text — cool white with a faint cyan cast */
+  --text: #e6f4ff;
+  --text-muted: rgba(180, 220, 255, 0.55);
+
+  /* Borders — thin cyan glow lines */
+  --border: rgba(102, 217, 255, 0.22);
+
+  /* Buttons — translucent cyan fills */
+  --btn-bg: rgba(102, 217, 255, 0.08);
+  --btn-border: rgba(102, 217, 255, 0.45);
+  --btn-bg-hover: rgba(102, 217, 255, 0.18);
+
+  /* State — claimed rows get a soft Cortana-blue wash; danger stays hot */
+  --claimed-bg: rgba(102, 217, 255, 0.1);
+  --danger: #ff6b6b;
+  --overlay: rgba(3, 9, 18, 0.65);
+
+  /* Typography — keep the Rajdhani military/technical vibe */
+  --font-sans: "Rajdhani", system-ui, sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", monospace;
+}
