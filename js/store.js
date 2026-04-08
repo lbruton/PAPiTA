@@ -102,6 +102,12 @@ export function loadFromStorage() {
     if (rec && typeof rec === "object" && rec.claimed_by === undefined) {
       rec.claimed_by = "";
     }
+    if (rec && typeof rec === "object" && rec.customer_po === undefined) {
+      rec.customer_po = "";
+    }
+    if (rec && typeof rec === "object" && rec.end_user_po === undefined) {
+      rec.end_user_po = "";
+    }
   }
   return { ok: true, hydrated: true, count: records.length };
 }

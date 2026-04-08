@@ -40,6 +40,17 @@
   vertical-align: middle;
 }
 
+#records-table tbody td:nth-child(3) {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#records-table tbody td:nth-child(4) {
+  white-space: nowrap;
+}
+
 #records-table tbody tr.claimed {
   background: var(--claimed-bg);
 }

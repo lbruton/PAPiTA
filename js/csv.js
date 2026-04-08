@@ -6,6 +6,8 @@ const COLUMNS = [
   "description",
   "order_number",
   "order_date",
+  "customer_po",
+  "end_user_po",
   "serial",
   "claimed_by",
   "claimed_at",

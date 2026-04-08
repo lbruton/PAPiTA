@@ -10,6 +10,8 @@ const COLUMNS = [
   { key: "part_number", label: "Part Number" },
   { key: "description", label: "Description" },
   { key: "order_number", label: "Order #" },
+  { key: "customer_po", label: "Customer PO" },
+  { key: "end_user_po", label: "End User PO" },
   { key: "serial", label: "Serial", mono: true },
   { key: "claimed_by", label: "Claimed By" },
   { key: "claimed_at", label: "Claimed At" },
@@ -36,7 +38,9 @@ function filterRows(records, filter) {
       String(r.auth_code || "").toLowerCase().includes(f) ||
       String(r.part_number || "").toLowerCase().includes(f) ||
       String(r.description || "").toLowerCase().includes(f) ||
-      String(r.serial || "").toLowerCase().includes(f)
+      String(r.serial || "").toLowerCase().includes(f) ||
+      String(r.customer_po || "").toLowerCase().includes(f) ||
+      String(r.end_user_po || "").toLowerCase().includes(f)
     );
   });
 }
@@ -97,6 +101,8 @@ function renderBody(rootEl, rows) {
     parts.push("<td>" + escapeHtml(r.part_number || "") + "</td>");
     parts.push("<td>" + escapeHtml(r.description || "") + "</td>");
     parts.push("<td>" + escapeHtml(r.order_number || "") + "</td>");
+    parts.push("<td>" + escapeHtml(r.customer_po || "") + "</td>");
+    parts.push("<td>" + escapeHtml(r.end_user_po || "") + "</td>");
 
     if (isClaiming) {
       parts.push(

@@ -61,6 +61,8 @@ function isValidPartNumber(s) {
 }
 const ORDER_NUMBER_RE = /Order\s*Number\s*[:#]?\s*(\d+)/i;
 const ORDER_DATE_RE = /Order\s*Date\s*[:#]?\s*([0-9A-Za-z\/\-\s,]+?)(?:\s{2,}|$)/i;
+const CUSTOMER_PO_RE = /Customer\s*PO\s*(?:Number|#|No\.?)?[:\s]+([^\s,|]+)/i;
+const END_USER_PO_RE = /End\s*User\s*PO\s*(?:Number|#|No\.?)?[:\s]+([^\s,|]+)/i;
 
 function isHeaderRow(cells) {
   if (!cells.length) return true;
@@ -99,12 +101,21 @@ function looksLikePartNumber(s) {
 }
 
 function extractOrderMeta(rows) {
-  const meta = { order_number: "", order_date: "" };
+  const meta = {
+    order_number: "",
+    order_date: "",
+    customer_po: "",
+    end_user_po: "",
+  };
   const joined = rows.map((r) => r.join(" ")).join("\n");
   const mNum = joined.match(ORDER_NUMBER_RE);
   if (mNum) meta.order_number = mNum[1].trim();
   const mDate = joined.match(ORDER_DATE_RE);
   if (mDate) meta.order_date = mDate[1].trim();
+  const mCust = joined.match(CUSTOMER_PO_RE);
+  if (mCust) meta.customer_po = mCust[1].trim();
+  const mEnd = joined.match(END_USER_PO_RE);
+  if (mEnd) meta.end_user_po = mEnd[1].trim();
   return meta;
 }
 
@@ -132,7 +143,12 @@ export async function parseFile(file) {
     const buffer = await file.arrayBuffer();
     const pdf = await getDocument({ data: buffer }).promise;
 
-    let orderMeta = { order_number: "", order_date: "" };
+    let orderMeta = {
+      order_number: "",
+      order_date: "",
+      customer_po: "",
+      end_user_po: "",
+    };
     let firstPageHadNoText = false;
 
     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
@@ -212,6 +228,8 @@ export async function parseFile(file) {
           description,
           order_number: orderMeta.order_number,
           order_date: orderMeta.order_date,
+          customer_po: orderMeta.customer_po,
+          end_user_po: orderMeta.end_user_po,
           serial: "",
           claimed_by: "",
           claimed_at: "",
