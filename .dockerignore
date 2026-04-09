@@ -1,0 +1,27 @@
+# AI tooling
+.claude/
+.specflow/
+CLAUDE.md
+AGENTS.md
+DESIGN.md
+
+# Specs & tests
+specs/
+
+# Git / docs
+.git/
+.gitignore
+.gitattributes
+README.md
+LICENSE
+
+# OS
+.DS_Store
+
+# Docker (don't copy into image)
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Sensitive work data
+CoWork/

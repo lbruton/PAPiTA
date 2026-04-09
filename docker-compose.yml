@@ -1,0 +1,7 @@
+services:
+  papita:
+    build: .
+    container_name: papita
+    ports:
+      - "8765:8080"
+    restart: unless-stopped
