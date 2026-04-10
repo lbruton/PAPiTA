@@ -21,6 +21,6 @@ RUN chgrp -R 0 /usr/share/nginx/html /var/cache/nginx /var/log/nginx /tmp && \
 
 EXPOSE 8080
 
-USER 1001
+USER 1001:0
 
 CMD ["nginx", "-g", "daemon off;"]

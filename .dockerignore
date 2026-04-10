@@ -12,6 +12,7 @@ specs/
 .git/
 .gitignore
 .gitattributes
+docs/
 README.md
 LICENSE
 
