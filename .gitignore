@@ -16,11 +16,18 @@ node_modules/
 # Git worktrees (per project convention; never commit worktree contents)
 .worktrees/
 
+# AI tooling & personal config — not shipped to corp GitLab
+.claude/
+.specflow/
+CLAUDE.md
+AGENTS.md
+DESIGN.md
+specs/
+
 # Sensitive work data — NEVER commit
 *.pdf
 *.csv
 CoWork/
 
-# Allow documented example fixtures if we ever add them
-!examples/**/*.pdf
-!examples/**/*.csv
+# Allow sample PDFs for testing (mock data only)
+!samples/**/*.pdf
