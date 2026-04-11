@@ -190,9 +190,16 @@ export function upsertMany(newRecords, { mergeStrategy = "claimed_at_wins" } = {
       if (k in candidate) merged[k] = candidate[k];
     }
     if (incomingWinsClaim) {
-      merged.serial = candidate.serial || "";
-      merged.claimed_at = candidate.claimed_at || "";
-      merged.claimed_by = candidate.claimed_by || "";
+      // Do not restore a claim if the incoming serial is currently held by a
+      // different record — this preserves overrides across CSV re-imports.
+      const serialHolder = candidate.serial
+        ? records.find((r) => r.auth_code !== normalized && r.serial === candidate.serial)
+        : null;
+      if (!serialHolder) {
+        merged.serial = candidate.serial || "";
+        merged.claimed_at = candidate.claimed_at || "";
+        merged.claimed_by = candidate.claimed_by || "";
+      }
     }
     records[idx] = merged;
     updated += 1;
@@ -224,11 +231,27 @@ export function claim(authCode, serial, { override = false, claimedBy = "" } = {
   if (conflict && override !== true) {
     return {
       ok: false,
-      conflict: { authCode: conflict.auth_code, serial: trimmed },
+      conflict: {
+        authCode: conflict.auth_code,
+        serial: trimmed,
+        claimedBy: conflict.claimed_by || "",
+        claimedAt: conflict.claimed_at || "",
+        partNumber: conflict.part_number || "",
+        description: conflict.description || "",
+      },
     };
   }
+  const now = nowIso();
+  if (conflict) {
+    conflict.serial = "";
+    conflict.claimed_at = "";
+    conflict.claimed_by = "";
+    conflict.notes = "";
+    const annotation = `Reclaimed from ${conflict.auth_code} on ${now.slice(0, 10)}`;
+    target.notes = target.notes ? `${target.notes}\n${annotation}` : annotation;
+  }
   target.serial = trimmed;
-  target.claimed_at = nowIso();
+  target.claimed_at = now;
   target.claimed_by = typeof claimedBy === "string" ? claimedBy.trim() : "";
   persist();
   notify();

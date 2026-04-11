@@ -54,13 +54,17 @@ export function commitClaim(authCode, serial, claimedBy) {
       serial: result.conflict.serial || serial,
       otherCode: result.conflict.authCode,
       claimedBy,
+      priorClaimedBy: result.conflict.claimedBy,
+      priorClaimedAt: result.conflict.claimedAt,
+      priorPartNumber: result.conflict.partNumber,
+      priorDescription: result.conflict.description,
     });
     return;
   }
   // Non-conflict error — leave row in claim-in-progress for the user to retry.
 }
 
-function openDuplicateModal({ authCode, serial, otherCode, claimedBy = "" }) {
+function openDuplicateModal({ authCode, serial, otherCode, claimedBy = "", priorClaimedBy, priorClaimedAt, priorPartNumber, priorDescription }) {
   const cancelBtn = el(
     "button",
     {
@@ -78,7 +82,7 @@ function openDuplicateModal({ authCode, serial, otherCode, claimedBy = "" }) {
       class: "btn btn-danger",
       "data-modal-action": "override",
     },
-    "Override",
+    "Override and clear prior",
   );
 
   cancelBtn.addEventListener("click", () => {
@@ -94,15 +98,34 @@ function openDuplicateModal({ authCode, serial, otherCode, claimedBy = "" }) {
     }
   });
 
-  const serialCode = el("code", { class: "mono" }, serial);
-  const otherCodeEl = el("code", { class: "mono" }, otherCode);
+  const formatDate = (val) => {
+    if (!val) return "—";
+    const d = new Date(val);
+    return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString();
+  };
 
-  const body = el("p", { class: "modal-body" }, [
-    "Serial ",
-    serialCode,
-    " is already claimed by auth code ",
-    otherCodeEl,
-    ". Override?",
+  const makeRow = (label, value) =>
+    el("div", { class: "modal-detail-row" }, [
+      el("span", { class: "modal-detail-label", style: "color:var(--text-muted)" }, label),
+      el("span", { class: "modal-detail-value" }, value || "—"),
+    ]);
+
+  const body = el("div", { class: "modal-body" }, [
+    el("p", {}, [
+      "Serial ",
+      el("code", { class: "mono" }, serial),
+      " \u2192 ",
+      el("code", { class: "mono" }, authCode),
+    ]),
+    el("p", {}, [
+      "Prior claim on ",
+      el("code", { class: "mono" }, otherCode),
+      ":",
+    ]),
+    makeRow("Part:", priorPartNumber || "—"),
+    makeRow("Desc:", priorDescription || "—"),
+    makeRow("Claimed by:", priorClaimedBy || "—"),
+    makeRow("Claimed at:", formatDate(priorClaimedAt)),
   ]);
 
   const panel = el(
