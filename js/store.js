@@ -224,8 +224,24 @@ export function claim(authCode, serial, { override = false, claimedBy = "" } = {
   if (conflict && override !== true) {
     return {
       ok: false,
-      conflict: { authCode: conflict.auth_code, serial: trimmed },
+      conflict: {
+        authCode: conflict.auth_code,
+        serial: trimmed,
+        claimedBy: conflict.claimed_by || "",
+        claimedAt: conflict.claimed_at || "",
+        partNumber: conflict.part_number || "",
+        description: conflict.description || "",
+      },
     };
+  }
+  if (conflict) {
+    conflict.serial = "";
+    conflict.claimed_at = "";
+    conflict.claimed_by = "";
+    const annotation = "Reclaimed from " + conflict.auth_code + " on " + nowIso().slice(0, 10);
+    target.notes = target.notes
+      ? target.notes + "\n" + annotation
+      : annotation;
   }
   target.serial = trimmed;
   target.claimed_at = nowIso();
