@@ -115,7 +115,7 @@ test("store: upsertMany returns counts shape", () => {
   assert.ok(Array.isArray(result.errors));
 });
 
-// PAP-2 TDD — failing tests for override behavior (written before implementation)
+// PAP-2 — override behavior tests
 
 test("store: claim override clears prior serial", () => {
   reset();

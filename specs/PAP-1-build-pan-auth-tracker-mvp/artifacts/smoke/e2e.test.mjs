@@ -1,7 +1,7 @@
 // PAP-4 — End-to-end import/claim/CSV-roundtrip smoke scenario.
 //
 // Walks the full multi-PDF + CSV-roundtrip lifecycle using the three sanitized
-// sample PDFs in CoWork/samples/. The 10 sequential steps ARE the contract:
+// sample PDFs in CoWork/samples/. The 11 sequential steps ARE the contract:
 // PDF in -> partial claim -> CSV out -> CSV in (merge) -> another PDF in ->
 // CSV out -> third PDF in -> claim all -> re-import old CSV (merge across
 // three orders). Asserts auth_code-as-merge-key invariant on every CSV import.

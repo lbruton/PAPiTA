@@ -100,13 +100,13 @@ function openDuplicateModal({ authCode, serial, otherCode, claimedBy = "", prior
 
   const formatDate = (val) => {
     if (!val) return "—";
-    const d = new Date(val).toLocaleDateString();
-    return d === "Invalid Date" ? "—" : d;
+    const d = new Date(val);
+    return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString();
   };
 
   const makeRow = (label, value) =>
     el("div", { class: "modal-detail-row" }, [
-      el("span", { class: "modal-detail-label", style: "color:var(--muted)" }, label),
+      el("span", { class: "modal-detail-label", style: "color:var(--text-muted)" }, label),
       el("span", { class: "modal-detail-value" }, value || "—"),
     ]);
 

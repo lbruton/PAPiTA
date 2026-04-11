@@ -241,18 +241,17 @@ export function claim(authCode, serial, { override = false, claimedBy = "" } = {
       },
     };
   }
+  const now = nowIso();
   if (conflict) {
     conflict.serial = "";
     conflict.claimed_at = "";
     conflict.claimed_by = "";
     conflict.notes = "";
-    const annotation = "Reclaimed from " + conflict.auth_code + " on " + nowIso().slice(0, 10);
-    target.notes = target.notes
-      ? target.notes + "\n" + annotation
-      : annotation;
+    const annotation = `Reclaimed from ${conflict.auth_code} on ${now.slice(0, 10)}`;
+    target.notes = target.notes ? `${target.notes}\n${annotation}` : annotation;
   }
   target.serial = trimmed;
-  target.claimed_at = nowIso();
+  target.claimed_at = now;
   target.claimed_by = typeof claimedBy === "string" ? claimedBy.trim() : "";
   persist();
   notify();
