@@ -168,6 +168,35 @@ test("store: claim override appends notes when notes already populated", () => {
   );
 });
 
+test("store: claim override clears notes on prior record", () => {
+  reset();
+  store.upsertMany([
+    baseRec("ABCD1234", { notes: "prior notes that should be cleared" }),
+    baseRec("EFGH5678"),
+  ]);
+  store.claim("ABCD1234", "SN-NOTES-CLEAR-TEST", { claimedBy: "Alice" });
+  store.claim("EFGH5678", "SN-NOTES-CLEAR-TEST", { override: true, claimedBy: "Bob" });
+  const recA = store.getByAuthCode("ABCD1234");
+  assert.equal(recA.notes, "", "prior holder notes must be cleared to empty string after override");
+});
+
+test("store: upsertMany does not restore overridden claim via re-import", () => {
+  reset();
+  store.upsertMany([baseRec("ABCD1234"), baseRec("EFGH5678")]);
+  // A claims serial X
+  store.claim("ABCD1234", "SN-REIMPORT-TEST", { claimedBy: "Alice" });
+  // Capture A's old claim row as it would appear in a pre-override CSV export
+  const oldA = { ...store.getByAuthCode("ABCD1234") };
+  // B overrides: A is cleared, B holds the serial
+  store.claim("EFGH5678", "SN-REIMPORT-TEST", { override: true, claimedBy: "Bob" });
+  // Re-import old CSV row for A — must not restore the claim
+  store.upsertMany([oldA]);
+  const recA = store.getByAuthCode("ABCD1234");
+  assert.equal(recA.serial, "", "re-import must not restore overridden serial on prior holder");
+  const recB = store.getByAuthCode("EFGH5678");
+  assert.equal(recB.serial, "SN-REIMPORT-TEST", "new holder must retain serial after re-import");
+});
+
 test("store: claim conflict returns full details", () => {
   reset();
   store.upsertMany([baseRec("ABCD1234"), baseRec("EFGH5678")]);
