@@ -15,6 +15,7 @@ const COLUMNS = [
   { key: "serial", label: "Serial", mono: true },
   { key: "claimed_by", label: "Claimed By" },
   { key: "claimed_at", label: "Claimed At" },
+  { key: "expires_at", label: "Expires" },
 ];
 
 const viewState = { sort: null, filter: "" };
@@ -134,6 +135,7 @@ function renderBody(rootEl, rows) {
     }
 
     parts.push('<td class="muted">' + escapeHtml(fmtDate(r.claimed_at)) + "</td>");
+    parts.push('<td class="muted">' + escapeHtml(r.expires_at || "") + "</td>");
 
     let actionBtn = "";
     if (isClaiming) {

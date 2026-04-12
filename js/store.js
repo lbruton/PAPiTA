@@ -187,6 +187,18 @@ export function upsertMany(newRecords, { mergeStrategy = "claimed_at_wins" } = {
     const candidate = { ...incoming, auth_code: normalized };
     const idx = records.findIndex((r) => r.auth_code === normalized);
     if (idx === -1) {
+      // New record: run expiration calculation before push
+      const days = parseTermDays(candidate.description);
+      if (days !== null && candidate.purchased_at && candidate.purchased_at.trim() !== "") {
+        const purchased = new Date(candidate.purchased_at);
+        if (!Number.isNaN(purchased.getTime())) {
+          const expires = new Date(purchased);
+          expires.setDate(expires.getDate() + days);
+          candidate.expires_at = expires.toISOString().slice(0, 10);
+        }
+      } else if (days === null && /\d+\s*(year|month)\s*term/i.test(candidate.description || "")) {
+        candidate.notes = (candidate.notes || "") + "\nCould not parse term from description.";
+      }
       records.push(candidate);
       added += 1;
       continue;

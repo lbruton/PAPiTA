@@ -4,6 +4,7 @@
 import { el } from "./utils/dom.js";
 
 let escapeListenerAttached = false;
+let currentResolve = null;
 
 function getModalRoot() {
   return document.getElementById("modal-root");
@@ -28,6 +29,8 @@ function mountModal(node) {
  */
 export function showPurchaseDateModal() {
   return new Promise((resolve) => {
+    currentResolve = resolve;
+
     const dateInput = el("input", {
       type: "date",
       id: "purchase-date-input",
@@ -75,12 +78,15 @@ export function showPurchaseDateModal() {
 
     confirmBtn.addEventListener("click", () => {
       closeAllModals();
-      resolve(dateInput.value || null);
+      const val = dateInput.value || null;
+      currentResolve(val);
+      currentResolve = null;
     });
 
     cancelBtn.addEventListener("click", () => {
       closeAllModals();
-      resolve(null);
+      currentResolve(null);
+      currentResolve = null;
     });
 
     const panel = el(
@@ -109,7 +115,8 @@ export function showPurchaseDateModal() {
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) {
         closeAllModals();
-        resolve(null);
+        currentResolve(null);
+        currentResolve = null;
       }
     });
 
@@ -125,7 +132,10 @@ export function showPurchaseDateModal() {
           const root = getModalRoot();
           if (root && root.firstChild) {
             closeAllModals();
-            resolve(null);
+            if (currentResolve) {
+              currentResolve(null);
+              currentResolve = null;
+            }
           }
         }
       });

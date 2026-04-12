@@ -1,0 +1,10 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]: PAPiTA
+    - button "Import PDF" [ref=e4] [cursor=pointer]
+    - button "Import CSV" [ref=e5] [cursor=pointer]
+    - button "Export CSV" [ref=e6] [cursor=pointer]
+    - button "Clear" [ref=e7] [cursor=pointer]
+    - searchbox "Filter…" [ref=e8]
+  - main [ref=e9]:
+    - paragraph [ref=e11]: No auth codes yet. Drop a vendor PDF or import a CSV to begin.

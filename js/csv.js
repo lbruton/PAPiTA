@@ -147,11 +147,30 @@ export function decode(text) {
   const header = rows[0];
   const errors = [];
 
-  for (const col of COLUMNS) {
+  // Required columns (core schema before PAP-3)
+  const REQUIRED_COLUMNS = [
+    "auth_code",
+    "part_number",
+    "description",
+    "order_number",
+    "order_date",
+    "customer_po",
+    "end_user_po",
+    "serial",
+    "claimed_by",
+    "claimed_at",
+    "imported_at",
+    "notes",
+  ];
+
+  for (const col of REQUIRED_COLUMNS) {
     if (!header.includes(col)) {
       return { records: [], errors: [`Missing required column: ${col}`] };
     }
   }
+
+  // Optional columns (added in PAP-3) — use defaults if missing
+  const OPTIONAL_COLUMNS = ["purchased_at", "expires_at"];
 
   const records = [];
   for (let r = 1; r < rows.length; r++) {
