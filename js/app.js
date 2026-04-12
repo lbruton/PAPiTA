@@ -291,7 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Check if CSV has purchased_at column
-      const firstRec = result.records && result.records[0];
+      const firstRec = result.records?.[0];
       const hasPurchasedAt = firstRec && "purchased_at" in firstRec;
 
       let recsToImport = result.records;

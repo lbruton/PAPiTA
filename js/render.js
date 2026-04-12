@@ -31,11 +31,10 @@ function fmtDate(iso) {
   return d.toISOString().replace("T", " ").slice(0, 16);
 }
 
-function isExpiringSoon(expiresAt) {
+function isExpiringSoon(expiresAt, now) {
   if (!expiresAt) return false;
   const target = new Date(expiresAt);
   if (Number.isNaN(target.getTime())) return false;
-  const now = new Date();
   const daysUntil = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
   return daysUntil <= 90 && daysUntil >= 0;
 }
@@ -99,10 +98,11 @@ function renderHead(rootEl) {
 }
 
 function renderBody(rootEl, rows) {
+  const now = new Date();
   const parts = [];
   for (const r of rows) {
     const claimed = Boolean(r.serial);
-    const expiringSoon = r.expires_at && isExpiringSoon(r.expires_at);
+    const expiringSoon = r.expires_at && isExpiringSoon(r.expires_at, now);
     let cls = claimed ? "row claimed" : "row unclaimed";
     if (expiringSoon) cls += " warning";
     const authCode = escapeHtml(r.auth_code || "");

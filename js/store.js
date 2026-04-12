@@ -20,7 +20,7 @@ function parseTermDays(description) {
   }
 
   // Try years first (with optional months in parentheses)
-  const yearMatch = description.match(/(?:(\d+)\s*year\s*(?:\((\d+)\s*months\)\s*)?term)/i);
+  const yearMatch = description.match(/(?:(\d+)\s*years?\s*(?:\((\d+)\s*months\)\s*)?term)/i);
   if (yearMatch) {
     const years = parseInt(yearMatch[1], 10);
     return years * 365;
@@ -196,8 +196,11 @@ export function upsertMany(newRecords, { mergeStrategy = "claimed_at_wins" } = {
           expires.setDate(expires.getDate() + days);
           candidate.expires_at = expires.toISOString().slice(0, 10);
         }
-      } else if (days === null && /\d+\s*(year|month)\s*term/i.test(candidate.description || "")) {
-        candidate.notes = (candidate.notes || "") + "\nCould not parse term from description.";
+      } else if (days === null && /\d+\s*(years?|months?)\s*term/i.test(candidate.description || "")) {
+        const msg = "Could not parse term from description.";
+        if (!(candidate.notes || "").includes(msg)) {
+          candidate.notes = candidate.notes ? `${candidate.notes}\n${msg}` : msg;
+        }
       }
       records.push(candidate);
       added += 1;
@@ -250,9 +253,12 @@ export function upsertMany(newRecords, { mergeStrategy = "claimed_at_wins" } = {
         expires.setDate(expires.getDate() + days);
         merged.expires_at = expires.toISOString().slice(0, 10);
       }
-    } else if (days === null && /\d+\s*(year|month)\s*term/i.test(candidate.description || "")) {
+    } else if (days === null && /\d+\s*(years?|months?)\s*term/i.test(candidate.description || "")) {
       // Term-like text found but parsing failed — add note.
-      merged.notes = (merged.notes || "") + "\nCould not parse term from description.";
+      const msg = "Could not parse term from description.";
+      if (!(merged.notes || "").includes(msg)) {
+        merged.notes = merged.notes ? `${merged.notes}\n${msg}` : msg;
+      }
     }
 
     if (incomingWinsClaim) {

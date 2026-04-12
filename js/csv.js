@@ -169,9 +169,6 @@ export function decode(text) {
     }
   }
 
-  // Optional columns (added in PAP-3) — use defaults if missing
-  const OPTIONAL_COLUMNS = ["purchased_at", "expires_at"];
-
   const records = [];
   for (let r = 1; r < rows.length; r++) {
     const row = rows[r];

@@ -16,6 +16,9 @@ node_modules/
 # Git worktrees (per project convention; never commit worktree contents)
 .worktrees/
 
+# Playwright MCP session artifacts
+.playwright-mcp/
+
 # AI tooling & personal config — not shipped to corp GitLab
 .claude/
 .specflow/

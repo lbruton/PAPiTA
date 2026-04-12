@@ -130,7 +130,7 @@ export function showPurchaseDateModal() {
       document.addEventListener("keydown", (ev) => {
         if (ev.key === "Escape") {
           const root = getModalRoot();
-          if (root && root.firstChild) {
+          if (root?.firstChild) {
             closeAllModals();
             if (currentResolve) {
               currentResolve(null);

@@ -1,6 +1,4 @@
 // Smoke test runner for PAPiTA — loads all test files and executes them.
-import assert from "node:assert/strict";
-
 globalThis.__papitaTests = [];
 
 // Load all test files
