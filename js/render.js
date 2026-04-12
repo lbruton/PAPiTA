@@ -15,6 +15,7 @@ const COLUMNS = [
   { key: "serial", label: "Serial", mono: true },
   { key: "claimed_by", label: "Claimed By" },
   { key: "claimed_at", label: "Claimed At" },
+  { key: "expires_at", label: "Expires" },
 ];
 
 const viewState = { sort: null, filter: "" };
@@ -28,6 +29,14 @@ function fmtDate(iso) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   return d.toISOString().replace("T", " ").slice(0, 16);
+}
+
+function isExpiringSoon(expiresAt, now) {
+  if (!expiresAt) return false;
+  const target = new Date(expiresAt);
+  if (Number.isNaN(target.getTime())) return false;
+  const daysUntil = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+  return daysUntil <= 90 && daysUntil >= 0;
 }
 
 function filterRows(records, filter) {
@@ -89,10 +98,13 @@ function renderHead(rootEl) {
 }
 
 function renderBody(rootEl, rows) {
+  const now = new Date();
   const parts = [];
   for (const r of rows) {
     const claimed = Boolean(r.serial);
-    const cls = claimed ? "row claimed" : "row unclaimed";
+    const expiringSoon = r.expires_at && isExpiringSoon(r.expires_at, now);
+    let cls = claimed ? "row claimed" : "row unclaimed";
+    if (expiringSoon) cls += " warning";
     const authCode = escapeHtml(r.auth_code || "");
     const isClaiming = claimingSet.has(r.auth_code);
 
@@ -123,6 +135,7 @@ function renderBody(rootEl, rows) {
     }
 
     parts.push('<td class="muted">' + escapeHtml(fmtDate(r.claimed_at)) + "</td>");
+    parts.push('<td class="muted">' + escapeHtml(r.expires_at || "") + "</td>");
 
     let actionBtn = "";
     if (isClaiming) {
