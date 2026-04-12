@@ -23,6 +23,7 @@
   --btn-bg-hover: rgba(240, 240, 250, 0.18);
   --claimed-bg: rgba(0, 180, 120, 0.08);
   --danger: #ff5a5a;
+  --warning-bg: rgba(245, 158, 11, 0.08);
   --overlay: rgba(0, 0, 0, 0.5);
   --font-sans: "Rajdhani", system-ui, sans-serif;
   --font-mono: ui-monospace, "JetBrains Mono", monospace;

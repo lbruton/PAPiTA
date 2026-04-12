@@ -4,6 +4,7 @@ import * as store from "./store.js";
 import * as render from "./render.js";
 import * as claim from "./claim.js";
 import * as csv from "./csv.js";
+import * as importModal from "./import-modal.js";
 import { parseFile } from "./parser.js";
 import { el } from "./utils/dom.js";
 
@@ -224,6 +225,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function handlePdfFile(file) {
     if (!file) return;
+    // Show purchase date modal before import
+    const purchasedAt = await importModal.showPurchaseDateModal();
+    if (purchasedAt === null) {
+      // User cancelled
+      return;
+    }
     try {
       const result = await parseFile(file);
       if (result && result.error) {
@@ -231,7 +238,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       const recs = (result && result.records) || [];
-      const upsertResult = store.upsertMany(recs);
+      // Add purchased_at to all records
+      const recsWithDate = recs.map((r) => ({ ...r, purchased_at: purchasedAt }));
+      const upsertResult = store.upsertMany(recsWithDate);
       showBanner({
         type: "import-ok",
         message: `Imported ${upsertResult.added} new / ${upsertResult.skipped} skipped / ${upsertResult.updated} updated`,
@@ -277,13 +286,31 @@ document.addEventListener("DOMContentLoaded", () => {
           type: "csv-error",
           message: "CSV import rejected: " + result.errors.join("; "),
         });
-      } else {
-        const up = store.upsertMany(result.records);
-        showBanner({
-          type: "import-ok",
-          message: `Imported ${up.added} new / ${up.skipped} skipped / ${up.updated} updated`,
-        });
+        ev.target.value = "";
+        return;
       }
+
+      // Check if CSV has purchased_at column
+      const firstRec = result.records && result.records[0];
+      const hasPurchasedAt = firstRec && "purchased_at" in firstRec;
+
+      let recsToImport = result.records;
+      if (!hasPurchasedAt) {
+        // Show purchase date modal if CSV lacks purchased_at
+        const purchasedAt = await importModal.showPurchaseDateModal();
+        if (purchasedAt === null) {
+          // User cancelled
+          ev.target.value = "";
+          return;
+        }
+        recsToImport = result.records.map((r) => ({ ...r, purchased_at: purchasedAt }));
+      }
+
+      const up = store.upsertMany(recsToImport);
+      showBanner({
+        type: "import-ok",
+        message: `Imported ${up.added} new / ${up.skipped} skipped / ${up.updated} updated`,
+      });
     } catch (err) {
       showBanner({ type: "csv-error", message: String(err && err.message ? err.message : err) });
     }

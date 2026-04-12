@@ -30,6 +30,15 @@ function fmtDate(iso) {
   return d.toISOString().replace("T", " ").slice(0, 16);
 }
 
+function isExpiringSoon(expiresAt) {
+  if (!expiresAt) return false;
+  const target = new Date(expiresAt);
+  if (Number.isNaN(target.getTime())) return false;
+  const now = new Date();
+  const daysUntil = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+  return daysUntil <= 90 && daysUntil >= 0;
+}
+
 function filterRows(records, filter) {
   const f = (filter || "").trim().toLowerCase();
   if (!f) return records.slice();
@@ -92,7 +101,9 @@ function renderBody(rootEl, rows) {
   const parts = [];
   for (const r of rows) {
     const claimed = Boolean(r.serial);
-    const cls = claimed ? "row claimed" : "row unclaimed";
+    const expiringSoon = r.expires_at && isExpiringSoon(r.expires_at);
+    let cls = claimed ? "row claimed" : "row unclaimed";
+    if (expiringSoon) cls += " warning";
     const authCode = escapeHtml(r.auth_code || "");
     const isClaiming = claimingSet.has(r.auth_code);
 

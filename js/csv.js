@@ -12,6 +12,8 @@ const COLUMNS = [
   "claimed_by",
   "claimed_at",
   "imported_at",
+  "purchased_at",
+  "expires_at",
   "notes",
 ];
 

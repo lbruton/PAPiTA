@@ -5,6 +5,37 @@
 import { normalizeAuthCode } from "./utils/escape.js";
 import { nowIso } from "./utils/time.js";
 
+/**
+ * Parse subscription term days from description string.
+ * Patterns:
+ *   - "X year (Y months) term" → X × 365 days (months ignored)
+ *   - "X year term" → X × 365 days
+ *   - "X months term" → X × 30 days (fallback, no years)
+ * @param {string} description - Description field from record
+ * @returns {number|null} - Term days or null if not found
+ */
+function parseTermDays(description) {
+  if (!description || typeof description !== "string") {
+    return null;
+  }
+
+  // Try years first (with optional months in parentheses)
+  const yearMatch = description.match(/(?:(\d+)\s*year\s*(?:\((\d+)\s*months\)\s*)?term)/i);
+  if (yearMatch) {
+    const years = parseInt(yearMatch[1], 10);
+    return years * 365;
+  }
+
+  // Fallback to months only
+  const monthMatch = description.match(/(?:(\d+)\s*months?\s*term)/i);
+  if (monthMatch) {
+    const months = parseInt(monthMatch[1], 10);
+    return months * 30;
+  }
+
+  return null;
+}
+
 const STORAGE_KEY = "pan-auth-tracker-v1";
 const SCHEMA_VERSION = 1;
 
@@ -113,6 +144,12 @@ export function loadFromStorage() {
     if (rec && typeof rec === "object" && rec.end_user_po === undefined) {
       rec.end_user_po = "";
     }
+    if (rec && typeof rec === "object" && rec.purchased_at === undefined) {
+      rec.purchased_at = "";
+    }
+    if (rec && typeof rec === "object" && rec.expires_at === undefined) {
+      rec.expires_at = "";
+    }
   }
   return { ok: true, hydrated: true, count: records.length };
 }
@@ -184,11 +221,28 @@ export function upsertMany(newRecords, { mergeStrategy = "claimed_at_wins" } = {
       "order_date",
       "customer_po",
       "end_user_po",
+      "purchased_at",
+      "expires_at",
       "notes",
     ];
     for (const k of metadataKeys) {
       if (k in candidate) merged[k] = candidate[k];
     }
+
+    // Parse term and calculate expiration if purchased_at is set.
+    const days = parseTermDays(candidate.description);
+    if (days !== null && candidate.purchased_at && candidate.purchased_at.trim() !== "") {
+      const purchased = new Date(candidate.purchased_at);
+      if (!Number.isNaN(purchased.getTime())) {
+        const expires = new Date(purchased);
+        expires.setDate(expires.getDate() + days);
+        merged.expires_at = expires.toISOString().slice(0, 10);
+      }
+    } else if (days === null && /\d+\s*(year|month)\s*term/i.test(candidate.description || "")) {
+      // Term-like text found but parsing failed — add note.
+      merged.notes = (merged.notes || "") + "\nCould not parse term from description.";
+    }
+
     if (incomingWinsClaim) {
       // Do not restore a claim if the incoming serial is currently held by a
       // different record — this preserves overrides across CSV re-imports.

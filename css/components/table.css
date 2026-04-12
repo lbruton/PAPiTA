@@ -59,6 +59,10 @@
   background: transparent;
 }
 
+#records-table tbody tr.warning {
+  background: var(--warning-bg);
+}
+
 .mono {
   font-family: var(--font-mono);
   font-size: 12px;
