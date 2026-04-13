@@ -46,9 +46,9 @@ function isExpiringSoon(expiresAt, now) {
 function getColumnValue(r, column) {
   if (column === "term_days") {
     // parseTermDays safely handles null/undefined, returns null
-    // Use -1 as sentinel to sort empty/invalid terms last
+    // Use Infinity as sentinel to sort empty/invalid terms last
     const d = parseTermDays(r.description);
-    return d !== null ? d : -1;
+    return d !== null ? d : Infinity;
   }
   return r[column] ?? "";
 }
@@ -72,10 +72,17 @@ function sortRows(rows, sort) {
   if (!sort) return rows;
   const { column, dir } = sort;
   const mul = dir === "desc" ? -1 : 1;
-  const decorated = rows.map((r, i) => ({ r, i }));
+
+  // Performance: pre-compute column values once before sorting
+  const decorated = rows.map((r, i) => ({
+    r,
+    i,
+    value: getColumnValue(r, column)
+  }));
+
   decorated.sort((a, b) => {
-    const av = getColumnValue(a.r, column);
-    const bv = getColumnValue(b.r, column);
+    const av = a.value;
+    const bv = b.value;
     if (typeof av === "number" && typeof bv === "number") {
       if (av !== bv) return (av < bv ? -1 : 1) * mul;
       // fall through to stable tiebreak
@@ -156,8 +163,8 @@ function renderBody(rootEl, rows) {
 
     parts.push('<td class="muted">' + escapeHtml(fmtDate(r.claimed_at)) + "</td>");
     parts.push('<td class="muted">' + escapeHtml(r.purchased_at || "") + "</td>");
-    const td = parseTermDays(r.description);
-    parts.push('<td class="muted">' + (td !== null ? escapeHtml(String(td)) : "") + "</td>");
+    const termDays = parseTermDays(r.description);
+    parts.push('<td class="muted">' + (termDays !== null ? escapeHtml(String(termDays)) : "") + "</td>");
     parts.push('<td class="muted">' + escapeHtml(r.expires_at || "") + "</td>");
 
     let actionBtn = "";
