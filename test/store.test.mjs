@@ -1,5 +1,6 @@
 // Smoke tests for js/store.js — install localStorage shim BEFORE importing.
 import assert from "node:assert/strict";
+import fs from "node:fs";
 
 globalThis.localStorage = {
   _data: new Map(),
@@ -10,6 +11,7 @@ globalThis.localStorage = {
 };
 
 const store = await import("../js/store.js");
+import { parseTermDays } from "../js/store.js";
 
 function reset() {
   globalThis.localStorage.clear();
@@ -211,4 +213,25 @@ test("store: claim conflict returns full details", () => {
   );
   assert.ok("partNumber" in result.conflict, "conflict.partNumber field must exist");
   assert.ok("description" in result.conflict, "conflict.description field must exist");
+});
+
+// PAP-5 — Term Days and Purchase Date tests (TDD — these MUST fail initially)
+
+test("PAP-5: parseTermDays export parses year/month terms", () => {
+  assert.equal(parseTermDays("1 year (12 months) term"), 365, "1 year = 365 days");
+  assert.equal(parseTermDays("3 year term"), 1095, "3 years = 1095 days");
+  assert.equal(parseTermDays("12 months term"), 360, "12 months = 360 days");
+  assert.equal(parseTermDays("no match"), null, "unparseable returns null");
+});
+
+test("PAP-5: render.js contains purchased_at and term_days columns", () => {
+  // This test will fail because render.js doesn't have these columns yet
+  const renderJs = fs.readFileSync(new URL("../js/render.js", import.meta.url), "utf-8");
+  assert.ok(renderJs.includes("purchased_at"), "render.js must contain 'purchased_at' column");
+  assert.ok(renderJs.includes("term_days"), "render.js must contain 'term_days' column");
+});
+
+test("PAP-5: parseTermDays handles blank/undefined safely", () => {
+  assert.equal(parseTermDays(""), null, "empty string returns null");
+  assert.equal(parseTermDays(undefined), null, "undefined returns null");
 });

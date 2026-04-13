@@ -4,6 +4,7 @@
 
 import { escapeHtml } from "./utils/escape.js";
 import { delegate } from "./utils/dom.js";
+import { parseTermDays } from "./store.js";
 
 const COLUMNS = [
   { key: "auth_code", label: "Auth Code", mono: true },
@@ -15,6 +16,9 @@ const COLUMNS = [
   { key: "serial", label: "Serial", mono: true },
   { key: "claimed_by", label: "Claimed By" },
   { key: "claimed_at", label: "Claimed At" },
+  { key: "purchased_at", label: "Purchase Date" },
+  // Note: term_days is a virtual column computed from description field
+  { key: "term_days", label: "Term (Days)" },
   { key: "expires_at", label: "Expires" },
 ];
 
@@ -39,6 +43,16 @@ function isExpiringSoon(expiresAt, now) {
   return daysUntil <= 90 && daysUntil >= 0;
 }
 
+function getColumnValue(r, column) {
+  if (column === "term_days") {
+    // parseTermDays safely handles null/undefined, returns null
+    // Use -1 as sentinel to sort empty/invalid terms last
+    const d = parseTermDays(r.description);
+    return d !== null ? d : -1;
+  }
+  return r[column] ?? "";
+}
+
 function filterRows(records, filter) {
   const f = (filter || "").trim().toLowerCase();
   if (!f) return records.slice();
@@ -60,10 +74,16 @@ function sortRows(rows, sort) {
   const mul = dir === "desc" ? -1 : 1;
   const decorated = rows.map((r, i) => ({ r, i }));
   decorated.sort((a, b) => {
-    const av = String(a.r[column] ?? "");
-    const bv = String(b.r[column] ?? "");
-    if (av < bv) return -1 * mul;
-    if (av > bv) return 1 * mul;
+    const av = getColumnValue(a.r, column);
+    const bv = getColumnValue(b.r, column);
+    if (typeof av === "number" && typeof bv === "number") {
+      if (av !== bv) return (av < bv ? -1 : 1) * mul;
+      // fall through to stable tiebreak
+    } else {
+      const as = String(av), bs = String(bv);
+      if (as < bs) return -1 * mul;
+      if (as > bs) return 1 * mul;
+    }
     const aa = String(a.r.auth_code ?? "");
     const bb = String(b.r.auth_code ?? "");
     if (aa < bb) return -1;
@@ -135,6 +155,9 @@ function renderBody(rootEl, rows) {
     }
 
     parts.push('<td class="muted">' + escapeHtml(fmtDate(r.claimed_at)) + "</td>");
+    parts.push('<td class="muted">' + escapeHtml(r.purchased_at || "") + "</td>");
+    const td = parseTermDays(r.description);
+    parts.push('<td class="muted">' + (td !== null ? escapeHtml(String(td)) : "") + "</td>");
     parts.push('<td class="muted">' + escapeHtml(r.expires_at || "") + "</td>");
 
     let actionBtn = "";
