@@ -14,7 +14,7 @@ import { nowIso } from "./utils/time.js";
  * @param {string} description - Description field from record
  * @returns {number|null} - Term days or null if not found
  */
-function parseTermDays(description) {
+export function parseTermDays(description) {
   if (!description || typeof description !== "string") {
     return null;
   }
