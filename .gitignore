@@ -20,10 +20,15 @@ node_modules/
 .playwright-mcp/
 
 # AI tooling & personal config — not shipped to corp GitLab
-.claude/
+# Root-level instruction files (CLAUDE.md / AGENTS.md) ARE tracked —
+# they describe the project. Only the tool-specific config dirs stay local.
+.claude/*
+!.claude/project.json
+.gemini/
+.codex/
+.kimi/
+.opencode/
 .specflow/
-CLAUDE.md
-AGENTS.md
 DESIGN.md
 specs/
 
